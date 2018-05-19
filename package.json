@@ -1,0 +1,34 @@
+{
+  "name": "ts-turnbased-ohhell",
+  "version": "0.0.1",
+  "description": "Typescript implementation of the Oh Hell card game",
+  "main": "index.js",
+  "typings": "index.ts",
+  "scripts": {
+    "pretest": "tsc",
+    "test": "mocha --recursive ./test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djmclaugh/ts-turnbased-ohhell.git"
+  },
+  "author": "djmclaugh",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/djmclaugh/ts-turnbased-ohhell/issues"
+  },
+  "homepage": "https://github.com/djmclaugh/ts-turnbased-ohhell#readme",
+  "dependencies": {
+    "random-seed": "^0.3.0",
+    "ts-turnbased": "0.0.5"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.3",
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^10.0.8",
+    "@types/random-seed": "^0.3.3",
+    "chai": "^4.1.2",
+    "mocha": "^5.1.1",
+    "typescript": "^2.8.3"
+  }
+}
