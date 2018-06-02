@@ -86,6 +86,7 @@ export interface OhHellPublicInfo {
 }
 
 export interface NewHandInfo {
+  handSize: number,
   revealedCard: Card,
   dealer: number
 }
@@ -175,6 +176,7 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
 
   private addNewHandInfo(update: OhHellUpdate): void {
     update.publicInfo.newHandInfo = {
+      handSize: this.hands[0].length,
       revealedCard: this.revealedCard,
       dealer: this.dealer
     };
