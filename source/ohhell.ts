@@ -7,7 +7,8 @@ import { isScoringVariant, Scorer, ScoringVariant } from "./scorer";
 // Options
 export interface OhHellOptions {
   numberOfPlayers: number,
-  scoringVariant: ScoringVariant
+  scoringVariant: ScoringVariant,
+  maxHandSize?: number
   // TODO(djmclaugh): Support different hand progressions
   // handProgressionVariant: ???
 }
@@ -22,9 +23,15 @@ export function sanitizeOptions(options: any): OhHellOptions {
   if (typeof options.scoringVariant != "string" || !isScoringVariant(options.scoringVariant)) {
     throw new InvalidOptionsError(options, "Invalid scoring variant");
   }
+  if (typeof options.maxHandSize != "undefined" && typeof options.maxHandSize != "number") {
+    throw new InvalidOptionsError(options, "If set, maxHandSize must be a number");
+  }
   let sanitizedOptions: OhHellOptions = {
     numberOfPlayers: Math.floor(options.numberOfPlayers),
-    scoringVariant: options.scoringVariant
+    scoringVariant: options.scoringVariant,
+  }
+  if (options.maxHandSize) {
+    sanitizedOptions.maxHandSize = Math.max(0, Math.floor(options.maxHandSize));
   }
   return sanitizedOptions;
 }
@@ -110,12 +117,6 @@ function shuffledCopy<T>(deck: Array<T>, randomNumberGenerator: RS.RandomSeed): 
 
 export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, OhHellPrivateInfo> {
 
-  private static numberOfCardsPerPlayer(round: number, numberOfPlayers: number): number {
-    let totalNumberOfCard: number = STANDARD_DECK.length;
-    let middleRound: number = Math.floor((totalNumberOfCard - 0.1) / numberOfPlayers);
-    return round <= middleRound ? round : 2 * middleRound - round;
-  }
-
   private randomNumberGenerator: RS.RandomSeed;
   private hands: Array<Array<Card>>;
   private points: Array<number>;
@@ -135,6 +136,15 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
     this.scorer = new Scorer(options.scoringVariant);
   }
 
+  private numberOfCardsPerPlayer(round: number): number {
+    let totalNumberOfCard: number = STANDARD_DECK.length;
+    let middleRound: number = Math.floor((totalNumberOfCard - 0.1) / this.options.numberOfPlayers);
+    if (this.options.maxHandSize) {
+      middleRound = Math.min(this.options.maxHandSize, middleRound);
+    }
+    return round <= middleRound ? round : 2 * middleRound - round;
+  }
+
   private nextPlayer(player: number): number {
     return (player + 1) % this.numberOfPlayers;
   }
@@ -150,7 +160,7 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
       this.hands.push([]);
     }
     let shuffledDeck: Array<Card> = shuffledCopy(STANDARD_DECK, this.randomNumberGenerator);
-    let numCards: number = OhHell.numberOfCardsPerPlayer(this.round, this.numberOfPlayers);
+    let numCards: number = this.numberOfCardsPerPlayer(this.round);
     for (let i: number = 0; i < numCards; ++i) {
       for (let p: number = 0; p < this.numberOfPlayers; ++p) {
         this.hands[p].push(shuffledDeck.pop());
@@ -303,7 +313,7 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
   }
 
   protected getWinners(): Array<number> {
-    if (OhHell.numberOfCardsPerPlayer(this.round, this.numberOfPlayers) == 0) {
+    if (this.numberOfCardsPerPlayer(this.round) == 0) {
       let highestScore: number = this.points[0];
       let winners: Array<number> = [ 0 ];
       for (let i = 1; i < this.numberOfPlayers; ++i) {

@@ -1,6 +1,6 @@
 {
   "name": "ts-turnbased-ohhell",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Typescript implementation of the Oh Hell card game",
   "main": "index.js",
   "typings": "index.ts",
