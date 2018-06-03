@@ -1,8 +1,36 @@
 import { OhHell } from "../source/ohhell";
+import { Card } from "../source/card";
 
 import { assert } from "chai";
 
 describe("OhHell", () => {
+  it("Hands in updates should not change as game progresses", function() {
+    let game: OhHell = new OhHell({numberOfPlayers: 4, scoringVariant: "BASIC"});
+    game.start("test_seed_1");
+    game.playMove({bid: 0}, 0);
+    game.playMove({bid: 1}, 1);
+    game.playMove({bid: 1}, 2);
+    game.playMove({bid: 0}, 3);
+
+    let hands: Array<Array<Card>> = game.getAllUpdates()[0].privateInfo;
+    assert.deepEqual(hands[0][0], {rank: 3, suit: "H"});
+    assert.deepEqual(hands[1][0], {rank: 12, suit: "C"});
+    assert.deepEqual(hands[2][0], {rank: 9, suit: "C"});
+    assert.deepEqual(hands[3][0], {rank: 2, suit: "S"});
+
+    // Play part of the trick
+    game.playMove({card: {rank: 3, suit: "H"}}, 0);
+    game.playMove({card: {rank: 12, suit: "C"}}, 1);
+
+    // Verify the that hands in the updates haven't changed even though the hands in the game have
+    // changed for players 0 and 1.
+    hands = game.getAllUpdates()[0].privateInfo;
+    assert.deepEqual(hands[0][0], {rank: 3, suit: "H"});
+    assert.deepEqual(hands[1][0], {rank: 12, suit: "C"});
+    assert.deepEqual(hands[2][0], {rank: 9, suit: "C"});
+    assert.deepEqual(hands[3][0], {rank: 2, suit: "S"});
+  });
+
   it("Two rounds test play", function() {
     let game: OhHell = new OhHell({numberOfPlayers: 4, scoringVariant: "BASIC"});
     game.start("test_seed_1");

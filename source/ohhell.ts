@@ -177,10 +177,16 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
   private addNewHandInfo(update: OhHellUpdate): void {
     update.publicInfo.newHandInfo = {
       handSize: this.hands[0].length,
-      revealedCard: this.revealedCard,
+      revealedCard: {
+        rank: this.revealedCard.rank,
+        suit: this.revealedCard.suit
+      },
       dealer: this.dealer
     };
-    update.privateInfo = this.hands;
+    update.privateInfo = []
+    for (let hand of this.hands) {
+      update.privateInfo.push(hand.concat());
+    }
   }
 
   private removeCardFromPlayer(card: Card, player: number): void {
@@ -262,7 +268,10 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
       update.toPlay = [ this.toPlay ];
     } else {
       let card: Card = (<CardMove>moves.get(this.toPlay)).card;
-      update.publicInfo.cardPlayed = card;
+      update.publicInfo.cardPlayed = {
+        rank: card.rank,
+        suit: card.suit,
+      };
       this.currentTrick.push(card);
       this.removeCardFromPlayer(card, this.toPlay);
       if (this.currentTrick.length == this.numberOfPlayers) {
@@ -272,7 +281,7 @@ export class OhHell extends Game<OhHellOptions, OhHellMove, OhHellPublicInfo, Oh
         this.tricks[winner] += 1;
         if (this.hands[0].length == 0) {
           this.scorer.updateScores(this.bids, this.tricks, this.points);
-          update.publicInfo.points = this.points;
+          update.publicInfo.points = this.points.concat();
           this.startNewRound();
           if (this.hands[0].length > 0) {
             this.addNewHandInfo(update);
